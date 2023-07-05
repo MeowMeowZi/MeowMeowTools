@@ -10,8 +10,7 @@ public class TestATable
     public string Test2;
     public string Name;
     public int Age;
-    public string Des;
-    public float High;
+    public string AAAA;
 }
 
 public class TestACfg : ScriptableObject
