@@ -8,86 +8,11 @@ using UnityEngine;
 
 namespace MeowMeowTools.ExcelTools
 {
-    // public class ExcelToolsSettings
-    // {
-    //     public string ExcelPath;
-    //     public string TableClassPath;
-    //     public string ScriptableObjectPath;
-    // }
-    
-    public class ExcelTools : EditorWindow
-    {
-        // private static ExcelToolsSettings settings;
+    public class ExcelTools : EditorWindow{
+        private static readonly string ExcelPath = "Assets/Tools/MeowMeowTools/ExcelTools/Data/Excels";
+        private static readonly string TableClassPath = "Assets/Tools/MeowMeowTools/ExcelTools/Data/TableClass";
+        private static readonly string ScriptableObjectPath = "Assets/Tools/MeowMeowTools/ExcelTools/Data/ScriptableObject";
         
-        // [MenuItem("Tools/MeowMeow Tools/Excel Tools/Settings", priority = 0)]
-        // public static void Settings()
-        // {
-        //     ExcelTools window = GetWindow<ExcelTools>();
-        //     window.Show();
-        //
-        //     settings = new ExcelToolsSettings();
-        //
-        //     // 读取配置.
-        //     // if (File.Exists(Application.dataPath + "Assets/Tools/MeowMeowTools/ExcelTools/Cfg/ExcelToolsSettings.json"))
-        //     // {
-        //     //     string json = File.ReadAllText(Application.dataPath + "Assets/Tools/MeowMeowTools/ExcelTools/Cfg/ExcelToolsSettings.json");
-        //     //     settings = JsonConvert.DeserializeObject<ExcelToolsSettings>(json);
-        //     // }
-        // }
-        //
-        // private void OnGUI()
-        // {
-        //     EditorGUILayout.BeginVertical();
-        //     
-        //         // 表格路径选择.
-        //         EditorGUILayout.BeginHorizontal();
-        //             EditorGUILayout.LabelField("Excel Path:", GUILayout.Width(150f));
-        //             EditorGUILayout.TextField(settings.ExcelPath);
-        //             if (GUILayout.Button("Path", GUILayout.Width(50f)))
-        //             {
-        //                 settings.ExcelPath = EditorUtility.OpenFolderPanel("ExcelPath", "", "");
-        //             }
-        //         EditorGUILayout.EndHorizontal();
-        //     
-        //         // 表格类路径选择.
-        //         EditorGUILayout.BeginHorizontal();
-        //             EditorGUILayout.LabelField("Select Table Class Path:", GUILayout.Width(150f));
-        //             EditorGUILayout.TextField(settings.TableClassPath);
-        //             if (GUILayout.Button("Path", GUILayout.Width(50f)))
-        //             {
-        //                 settings.TableClassPath = EditorUtility.OpenFolderPanel("TableClass", "", "");
-        //             }
-        //         EditorGUILayout.EndHorizontal();
-        //         
-        //         // ScriptableObject路径选择.
-        //         EditorGUILayout.BeginHorizontal();
-        //             EditorGUILayout.LabelField("ScriptableObject Path:", GUILayout.Width(150f));
-        //             EditorGUILayout.TextField(settings.ScriptableObjectPath);
-        //             if (GUILayout.Button("Path", GUILayout.Width(50f)))
-        //             {
-        //                 settings.ScriptableObjectPath = EditorUtility.OpenFolderPanel("ScriptableObjectPath", "", "");
-        //             }
-        //         EditorGUILayout.EndHorizontal();
-        //         
-        //         // 保存设置.
-        //         if (GUILayout.Button("Save Settings", GUILayout.Width(100f)))
-        //         {
-        //             string json = JsonConvert.SerializeObject(settings);
-        //             if (!Directory.Exists(Application.dataPath + "/Tools/MeowMeowTools/ExcelTools/Cfg/"))
-        //             {
-        //                 Directory.CreateDirectory(Application.dataPath + "/Tools/MeowMeowTools/ExcelTools/Cfg/");
-        //             }
-        //
-        //             if (!File.Exists(Application.dataPath + "/Tools/MeowMeowTools/ExcelTools/Cfg/ExcelToolsSettings.json"))
-        //             {
-        //                 File.Create(Application.dataPath + "/Tools/MeowMeowTools/ExcelTools/Cfg/ExcelToolsSettings.json");
-        //             }
-        //             File.WriteAllText(Application.dataPath + "/Tools/MeowMeowTools/ExcelTools/Cfg/ExcelToolsSettings.json", json);
-        //         }
-        //
-        //     EditorGUILayout.EndVertical();
-        // }
-
         [MenuItem("Tools/MeowMeow Tools/Excel Tools/Generate Table Class", priority = 1)]
         public static void GenerateTableClass()
         {
@@ -103,6 +28,7 @@ namespace MeowMeowTools.ExcelTools
                     string className = string.Empty;
                     List<string> propertyNames = new List<string>();
                     List<string> propertyTypes = new List<string>();
+                    List<string> propertyDescriptions = new List<string>();
                     while (reader.Read())
                     {
                         for (int colCounter = 0; colCounter < reader.FieldCount; colCounter++)
@@ -112,14 +38,20 @@ namespace MeowMeowTools.ExcelTools
                             {
                                 className = reader.Name;
                             }
-                            // 获取属性名.
+                            // 获取属性描述.
                             if (!reader.IsDBNull(colCounter) && rowCounter == 0)
+                            {
+                                string value = reader.GetString(colCounter);
+                                propertyDescriptions.Add(value);
+                            }
+                            // 获取属性名.
+                            if (!reader.IsDBNull(colCounter) && rowCounter == 1)
                             {
                                 string value = reader.GetString(colCounter);
                                 propertyNames.Add(value);
                             }
                             // 获取属性类型.
-                            if (!reader.IsDBNull(colCounter) && rowCounter == 1)
+                            if (!reader.IsDBNull(colCounter) && rowCounter == 2)
                             {
                                 string value = reader.GetString(colCounter);
                                 propertyTypes.Add(value);
@@ -131,7 +63,7 @@ namespace MeowMeowTools.ExcelTools
                     // 判断类名是否为空.
                     if (!string.IsNullOrEmpty(className))
                     {
-                        string content = GenerateClassTemplate(className, propertyNames, propertyTypes);
+                        string content = GenerateClassTemplate(className, propertyDescriptions, propertyNames, propertyTypes);
                         SaveClassTemplate(className, content);
                     }
                 } while (reader.NextResult());
@@ -145,6 +77,7 @@ namespace MeowMeowTools.ExcelTools
         public static void GenerateScriptableObject()
         {
             List<string> files = ParseExcelFiles();
+            List<string> classNames = new List<string>();
 
             foreach (string file in files)
             {
@@ -158,12 +91,13 @@ namespace MeowMeowTools.ExcelTools
                     int key = 0;
                     reader.Read();
                     reader.Read();
+                    reader.Read();
                     while (reader.Read())
                     {
                         for (int colCounter = 0; colCounter < reader.FieldCount; colCounter++)
                         {
                             // 获取类名.
-                            if (!reader.IsDBNull(colCounter) && colCounter == 0 && rowCounter == 2)
+                            if (!reader.IsDBNull(colCounter) && colCounter == 0 && rowCounter == 3)
                             {
                                 className = reader.Name;
                             }
@@ -191,9 +125,13 @@ namespace MeowMeowTools.ExcelTools
                     if (!string.IsNullOrEmpty(className))
                     {
                         GenerateScriptableObjectTemplate(className, propertyValues);
+                        classNames.Add(className);
                     }
                 } while (reader.NextResult());
-            
+
+                string content = GenerateExcelTablePropertyTemplate(classNames);
+                SaveExcelTablePropertyTemplate(content);
+                
                 // 关闭数据流.
                 reader.Close();
             }
@@ -202,8 +140,6 @@ namespace MeowMeowTools.ExcelTools
         // 解析Excel文件路径.
         private static List<string> ParseExcelFiles()
         {
-            // 设置路径.
-            string path = "Assets/Tools/MeowMeowTools/ExcelTools/Excels";
             // 设置表格后缀格式.
             string[] searchPatterns = { "*.xls", "*.xlsx" };
             
@@ -211,7 +147,7 @@ namespace MeowMeowTools.ExcelTools
             List<string> files = new List<string>();
             foreach (string pattern in searchPatterns)
             {
-                IEnumerable<string> matchingFiles = Directory.EnumerateFiles(path, pattern, SearchOption.AllDirectories);
+                IEnumerable<string> matchingFiles = Directory.EnumerateFiles(ExcelPath, pattern, SearchOption.AllDirectories);
                 files.AddRange(matchingFiles);
             }
 
@@ -228,42 +164,73 @@ namespace MeowMeowTools.ExcelTools
         }
 
         // 生成类模板.
-        private static string GenerateClassTemplate(string className, List<string> propertyNames, List<string> propertyTypes)
+        private static string GenerateClassTemplate(string className, List<string> propertyDescriptions, List<string> propertyNames, List<string> propertyTypes)
         {
             string scriptTemplate = 
 @"using System;
-using System.Collections.Generic;
-using UnityEngine;
-[Serializable]
-public class #TABLE_NAME#
-{#SCRIPTABLE_OBJECT_FIELDS#
-}
-
-public class #CFG_NAME# : ScriptableObject
+namespace MeowMeowTools.ExcelTools
 {
-    public List<#TABLE_NAME#> list;
-    public Dictionary<int, #TABLE_NAME#> dict;
-    
-    public void Init()
+    [Serializable]
+    public class #TABLE_NAME# : TableBase
+    {#SCRIPTABLE_OBJECT_FIELDS#
+    }
+
+    public class #CFG_NAME# : CfgBase<#TABLE_NAME#>
     {
-        dict = new Dictionary<int, #TABLE_NAME#>();
-        foreach (var item in list)
-        {
-            dict.Add(item.Id, item);
-        }
     }
 }
 ";
             string propertyFields = string.Empty;
-            for (int i = 0; i < propertyNames.Count; i++)
-            {
-                propertyFields += $"\n    public {propertyTypes[i]} {propertyNames[i]};";
+            for (int i = 1; i < propertyNames.Count; i++){
+                propertyFields += $"\n\t\t/// <summary>";
+                propertyFields += $"\n\t\t/// {propertyDescriptions[i]}.";
+                propertyFields += $"\n\t\t/// </summary>";
+                propertyFields += $"\n\t\tpublic {propertyTypes[i]} {propertyNames[i]};";
             }
 
             // 替换模板中的占位符
-            string scriptContent = scriptTemplate.Replace("#TABLE_NAME#", $"{className}Table")
-                .Replace("#CFG_NAME#", $"{className}Cfg")
+            string scriptContent = scriptTemplate.Replace("#TABLE_NAME#", $"Table{className}")
+                .Replace("#CFG_NAME#", $"Cfg{className}")
                 .Replace("#SCRIPTABLE_OBJECT_FIELDS#", propertyFields);
+
+            return scriptContent;
+        }
+        
+        // 生成表索引模版.
+        private static string GenerateExcelTablePropertyTemplate(List<string> classNames){
+            string scriptTemplate = 
+@"using UnityEditor;
+
+namespace MeowMeowTools.ExcelTools
+{
+    public partial class ExcelManager
+    {#SCRIPTABLE_OBJECT_FIELDS#
+        
+        public void ReferenceScriptableObject()
+        {
+            #FIND_SCRIPTABLE_OBJECT_FIELDS#
+        }
+    }
+}
+";
+            string excelTableFields = string.Empty;
+            for (int i = 0; i < classNames.Count; i++)
+            {
+                excelTableFields += $"\n\t\tpublic Cfg{classNames[i]} Cfg{classNames[i]};";
+            }
+
+            string findScriptableObjectFields = string.Empty;
+            findScriptableObjectFields += $"string[] guids;\n\t\t\tstring path;";
+            for (int i = 0; i < classNames.Count; i++){
+                findScriptableObjectFields += $"\n\t\t\tguids = AssetDatabase.FindAssets(\"ScriptableObject{classNames[i]} t:ScriptableObject\", new []{{\"{ScriptableObjectPath}\"}});";
+                findScriptableObjectFields += $"\n\t\t\tpath = AssetDatabase.GUIDToAssetPath(guids[0]);";
+                findScriptableObjectFields += $"\n\t\t\tCfg{classNames[i]} = AssetDatabase.LoadAssetAtPath<Cfg{classNames[i]}>(path);";
+                findScriptableObjectFields += $"\n\t\t\tCfg{classNames[i]}.Init();";
+            }
+
+            // 替换模板中的占位符
+            string scriptContent = scriptTemplate.Replace("#SCRIPTABLE_OBJECT_FIELDS#", excelTableFields)
+                .Replace("#FIND_SCRIPTABLE_OBJECT_FIELDS#", findScriptableObjectFields);
 
             return scriptContent;
         }
@@ -272,7 +239,7 @@ public class #CFG_NAME# : ScriptableObject
         private static void SaveClassTemplate(string className, string scriptContent)
         {
             // 保存文件的路径
-            string savePath = $"Assets/Tools/MeowMeowTools/ExcelTools/TableClass/{className}Cfg.cs";
+            string savePath = $"{TableClassPath}/Cfg{className}.cs";
 
             if (!string.IsNullOrEmpty(savePath))
             {
@@ -280,7 +247,22 @@ public class #CFG_NAME# : ScriptableObject
                 File.WriteAllText(savePath, scriptContent);
                 AssetDatabase.Refresh();
 
-                Debug.Log($"Class table generated: {className} Successfully!");
+                Debug.Log($"Class table Generated: {className} Successfully!");
+            }
+        }
+        
+        // 保存生成的表索引模版.
+        private static void SaveExcelTablePropertyTemplate(string scriptContent){
+            // 保存文件的路径
+            string savePath = $"{TableClassPath}/ExcelTableProperty.cs";
+
+            if (!string.IsNullOrEmpty(savePath))
+            {
+                // 保存生成的脚本文件
+                File.WriteAllText(savePath, scriptContent);
+                AssetDatabase.Refresh();
+
+                Debug.Log($"Excel Table Property Generated Successfully!");
             }
         }
         
@@ -288,7 +270,7 @@ public class #CFG_NAME# : ScriptableObject
         private static void GenerateScriptableObjectTemplate(string className, Dictionary<int, List<string>> propertyValues)
         {
             // 生成ScriptableObject.
-            ScriptableObject scriptableObject = ScriptableObject.CreateInstance($"{className}Cfg");
+            ScriptableObject scriptableObject = ScriptableObject.CreateInstance($"Cfg{className}");
 
             // 生成SerializedObject.
             SerializedObject serializedObject = new SerializedObject(scriptableObject);
@@ -318,7 +300,7 @@ public class #CFG_NAME# : ScriptableObject
                     property.floatValue = float.Parse(enumerator.Current.Value[index++]);
                 }
 
-                if (property.name == "data" && property.type == $"{className}Table")
+                if (property.name == "data" && property.type == $"Table{className}")
                 {
                     index = 0;
                     enumerator.MoveNext();
@@ -327,17 +309,13 @@ public class #CFG_NAME# : ScriptableObject
 
             // 应用修改.
             serializedObject.ApplyModifiedProperties();
-            
-            // 执行初始化方法, 将列表存入字典中.
-            MethodInfo methodInfo = scriptableObject.GetType().GetMethod("Init");
-            methodInfo.Invoke(scriptableObject, null);
 
             // 保存文件.
-            string assetPath = $"Assets/Tools/MeowMeowTools/ExcelTools/ScriptableObject/{className}ScriptableObject.asset";
+            string assetPath = $"{ScriptableObjectPath}/ScriptableObject{className}.asset";
             AssetDatabase.CreateAsset(scriptableObject, assetPath);
             AssetDatabase.SaveAssets();
 
-            Debug.Log($"ScriptableObject generated: {className} Successfully!");
+            Debug.Log($"ScriptableObject Generated: {className} Successfully!");
         }
     }
 }

@@ -1,0 +1,99 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6ce6bea84f334bac8f169c4548af1a3, type: 3}
+  m_Name: ScriptableObjectTestA
+  m_EditorClassIdentifier: 
+  list:
+  - id: 0
+    test: AACC
+    test1: BBBB
+    test2: CCAA
+    name: Meow
+    age: 999
+    descripts: AAAA
+  - id: 1
+    test: AACC
+    test1: BBBB
+    test2: CCAA
+    name: Meow
+    age: 18
+    descripts: B
+  - id: 2
+    test: DDDD
+    test1: EEEE
+    test2: FFFF
+    name: Zi
+    age: 30
+    descripts: C
+  - id: 3
+    test: AACC
+    test1: BBBB
+    test2: CCAA
+    name: Meow
+    age: 999
+    descripts: AAAA
+  - id: 4
+    test: AACC
+    test1: BBBB
+    test2: CCAA
+    name: Meow
+    age: 18
+    descripts: B
+  - id: 5
+    test: DDDD
+    test1: EEEE
+    test2: FFFF
+    name: Zi
+    age: 30
+    descripts: C
+  - id: 6
+    test: AACC
+    test1: BBBB
+    test2: CCAA
+    name: Meow
+    age: 999
+    descripts: AAAA
+  - id: 7
+    test: AACC
+    test1: BBBB
+    test2: CCAA
+    name: Meow
+    age: 18
+    descripts: B
+  - id: 8
+    test: DDDD
+    test1: EEEE
+    test2: FFFF
+    name: Zi
+    age: 30
+    descripts: C
+  - id: 9
+    test: AACC
+    test1: BBBB
+    test2: CCAA
+    name: Meow
+    age: 999
+    descripts: AAAA
+  - id: 10
+    test: AACC
+    test1: BBBB
+    test2: CCAA
+    name: Meow
+    age: 18
+    descripts: B
+  - id: 11
+    test: DDDD
+    test1: EEEE
+    test2: FFFF
+    name: Zi
+    age: 30
+    descripts: C
