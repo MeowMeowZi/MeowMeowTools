@@ -182,10 +182,10 @@ namespace MeowMeowTools.ExcelTools
 ";
             string propertyFields = string.Empty;
             for (int i = 1; i < propertyNames.Count; i++){
-                propertyFields += $"\n\t\t/// <summary>";
-                propertyFields += $"\n\t\t/// {propertyDescriptions[i]}.";
-                propertyFields += $"\n\t\t/// </summary>";
-                propertyFields += $"\n\t\tpublic {propertyTypes[i]} {propertyNames[i]};";
+                propertyFields += $"\r\n\t\t/// <summary>";
+                propertyFields += $"\r\n\t\t/// {propertyDescriptions[i]}.";
+                propertyFields += $"\r\n\t\t/// </summary>";
+                propertyFields += $"\r\n\t\tpublic {propertyTypes[i]} {propertyNames[i]};";
             }
 
             // 替换模板中的占位符
@@ -200,7 +200,7 @@ namespace MeowMeowTools.ExcelTools
         private static string GenerateExcelTablePropertyTemplate(List<string> classNames){
             string scriptTemplate = 
 @"using UnityEditor;
-
+using UnityEngine;
 namespace MeowMeowTools.ExcelTools
 {
     public partial class ExcelManager
@@ -216,16 +216,17 @@ namespace MeowMeowTools.ExcelTools
             string excelTableFields = string.Empty;
             for (int i = 0; i < classNames.Count; i++)
             {
-                excelTableFields += $"\n\t\tpublic Cfg{classNames[i]} Cfg{classNames[i]};";
+                excelTableFields += $"\r\n\t\t[HideInInspector]";
+                excelTableFields += $"\r\n\t\tpublic Cfg{classNames[i]} Cfg{classNames[i]};";
             }
 
             string findScriptableObjectFields = string.Empty;
-            findScriptableObjectFields += $"string[] guids;\n\t\t\tstring path;";
+            findScriptableObjectFields += $"string[] guids;\r\n\t\t\tstring path;";
             for (int i = 0; i < classNames.Count; i++){
-                findScriptableObjectFields += $"\n\t\t\tguids = AssetDatabase.FindAssets(\"ScriptableObject{classNames[i]} t:ScriptableObject\", new []{{\"{ScriptableObjectPath}\"}});";
-                findScriptableObjectFields += $"\n\t\t\tpath = AssetDatabase.GUIDToAssetPath(guids[0]);";
-                findScriptableObjectFields += $"\n\t\t\tCfg{classNames[i]} = AssetDatabase.LoadAssetAtPath<Cfg{classNames[i]}>(path);";
-                findScriptableObjectFields += $"\n\t\t\tCfg{classNames[i]}.Init();";
+                findScriptableObjectFields += $"\r\n\t\t\tguids = AssetDatabase.FindAssets(\"ScriptableObject{classNames[i]} t:ScriptableObject\", new []{{\"{ScriptableObjectPath}\"}});";
+                findScriptableObjectFields += $"\r\n\t\t\tpath = AssetDatabase.GUIDToAssetPath(guids[0]);";
+                findScriptableObjectFields += $"\r\n\t\t\tCfg{classNames[i]} = AssetDatabase.LoadAssetAtPath<Cfg{classNames[i]}>(path);";
+                findScriptableObjectFields += $"\r\n\t\t\tCfg{classNames[i]}.Init();";
             }
 
             // 替换模板中的占位符
