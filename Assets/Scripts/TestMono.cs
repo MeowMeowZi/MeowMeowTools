@@ -7,7 +7,10 @@ public class TestMono : MonoBehaviour
 {
     // Start is called before the first frame update
     void Start(){
-        Debug.Log($"---{ExcelManager.Instance.CfgTestA[0].name}");
+        CfgTestA cfgTestA = ExcelManager.Instance.TableTestA[0];
+        Debug.Log($"---{cfgTestA.id}");
+        Debug.Log($"---{cfgTestA.name}");
+        Debug.Log($"---{cfgTestA.age}");
     }
 
     // Update is called once per frame

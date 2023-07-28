@@ -11,7 +11,7 @@ namespace MeowMeowTools.ExcelTools
     public class ExcelTools : EditorWindow{
         private static readonly string ExcelPath = "Assets/Tools/MeowMeowTools/ExcelTools/Data/Excels";
         private static readonly string TableClassPath = "Assets/Tools/MeowMeowTools/ExcelTools/Data/TableClass";
-        private static readonly string ScriptableObjectPath = "Assets/Tools/MeowMeowTools/ExcelTools/Data/ScriptableObject";
+        private static readonly string ScriptableObjectPath = "Assets/Tools/MeowMeowTools/ExcelTools/Data/Resources";
         
         [MenuItem("Tools/MeowMeow Tools/Excel Tools/Generate Table Class", priority = 1)]
         public static void GenerateTableClass()
@@ -171,11 +171,11 @@ namespace MeowMeowTools.ExcelTools
 namespace MeowMeowTools.ExcelTools
 {
     [Serializable]
-    public class #TABLE_NAME# : TableBase
+    public class #CFG_NAME# : CfgBase
     {#SCRIPTABLE_OBJECT_FIELDS#
     }
 
-    public class #CFG_NAME# : CfgBase<#TABLE_NAME#>
+    public class #TABLE_NAME# : TableBase<#CFG_NAME#>
     {
     }
 }
@@ -189,8 +189,8 @@ namespace MeowMeowTools.ExcelTools
             }
 
             // 替换模板中的占位符
-            string scriptContent = scriptTemplate.Replace("#TABLE_NAME#", $"Table{className}")
-                .Replace("#CFG_NAME#", $"Cfg{className}")
+            string scriptContent = scriptTemplate.Replace("#CFG_NAME#", $"Cfg{className}")
+                .Replace("#TABLE_NAME#", $"Table{className}")
                 .Replace("#SCRIPTABLE_OBJECT_FIELDS#", propertyFields);
 
             return scriptContent;
@@ -207,8 +207,7 @@ namespace MeowMeowTools.ExcelTools
     {#SCRIPTABLE_OBJECT_FIELDS#
         
         public void ReferenceScriptableObject()
-        {
-            #FIND_SCRIPTABLE_OBJECT_FIELDS#
+        {#FIND_SCRIPTABLE_OBJECT_FIELDS#
         }
     }
 }
@@ -217,16 +216,13 @@ namespace MeowMeowTools.ExcelTools
             for (int i = 0; i < classNames.Count; i++)
             {
                 excelTableFields += $"\r\n\t\t[HideInInspector]";
-                excelTableFields += $"\r\n\t\tpublic Cfg{classNames[i]} Cfg{classNames[i]};";
+                excelTableFields += $"\r\n\t\tpublic Table{classNames[i]} Table{classNames[i]};";
             }
 
             string findScriptableObjectFields = string.Empty;
-            findScriptableObjectFields += $"string[] guids;\r\n\t\t\tstring path;";
             for (int i = 0; i < classNames.Count; i++){
-                findScriptableObjectFields += $"\r\n\t\t\tguids = AssetDatabase.FindAssets(\"ScriptableObject{classNames[i]} t:ScriptableObject\", new []{{\"{ScriptableObjectPath}\"}});";
-                findScriptableObjectFields += $"\r\n\t\t\tpath = AssetDatabase.GUIDToAssetPath(guids[0]);";
-                findScriptableObjectFields += $"\r\n\t\t\tCfg{classNames[i]} = AssetDatabase.LoadAssetAtPath<Cfg{classNames[i]}>(path);";
-                findScriptableObjectFields += $"\r\n\t\t\tCfg{classNames[i]}.Init();";
+                findScriptableObjectFields += $"\r\n\t\t\tTable{classNames[i]} = Resources.Load<Table{classNames[i]}>(\"ScriptableObject{classNames[i]}\");";
+                findScriptableObjectFields += $"\r\n\t\t\tTable{classNames[i]}.Init();";
             }
 
             // 替换模板中的占位符
@@ -240,7 +236,7 @@ namespace MeowMeowTools.ExcelTools
         private static void SaveClassTemplate(string className, string scriptContent)
         {
             // 保存文件的路径
-            string savePath = $"{TableClassPath}/Cfg{className}.cs";
+            string savePath = $"{TableClassPath}/Table{className}.cs";
 
             if (!string.IsNullOrEmpty(savePath))
             {
@@ -271,7 +267,7 @@ namespace MeowMeowTools.ExcelTools
         private static void GenerateScriptableObjectTemplate(string className, Dictionary<int, List<string>> propertyValues)
         {
             // 生成ScriptableObject.
-            ScriptableObject scriptableObject = ScriptableObject.CreateInstance($"Cfg{className}");
+            ScriptableObject scriptableObject = ScriptableObject.CreateInstance($"Table{className}");
 
             // 生成SerializedObject.
             SerializedObject serializedObject = new SerializedObject(scriptableObject);
@@ -301,7 +297,7 @@ namespace MeowMeowTools.ExcelTools
                     property.floatValue = float.Parse(enumerator.Current.Value[index++]);
                 }
 
-                if (property.name == "data" && property.type == $"Table{className}")
+                if (property.name == "data" && property.type == $"Cfg{className}")
                 {
                     index = 0;
                     enumerator.MoveNext();
